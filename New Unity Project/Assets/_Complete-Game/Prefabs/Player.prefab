@@ -127,6 +127,7 @@ MonoBehaviour:
   pointsPerSoda: 20
   wallDamage: 1
   speed: 5
+  meleeDamage: 10
 --- !u!212 &212418693641714686
 SpriteRenderer:
   m_ObjectHideFlags: 1

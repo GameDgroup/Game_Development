@@ -5,6 +5,7 @@ using UnityEngine;
 public class Enemy : MovingObject {
 
     public int playerDamage;
+    public int badGuyHealth;
     public float speed;
 
     private Animator animator;
@@ -29,6 +30,14 @@ public class Enemy : MovingObject {
                                                      speed * Time.deltaTime);
         }
 	}
+
+    public void TakeDamage(int damage)
+    {
+        badGuyHealth = badGuyHealth - damage;
+
+        if (badGuyHealth <= 0)
+            Destroy(gameObject);
+    }
 
     protected override void AttemptMove<T>(int xDir, int yDir)
     {

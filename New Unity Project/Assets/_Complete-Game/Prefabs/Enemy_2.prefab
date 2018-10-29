@@ -88,7 +88,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   serializedVersion: 2
   m_Size: {x: 0.9, y: 0.9}
-  m_EdgeRadius: 0
+  m_EdgeRadius: 1
 --- !u!95 &95138194739559568
 Animator:
   serializedVersion: 3
@@ -123,6 +123,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 256
   playerDamage: 20
+  badGuyHealth: 40
   speed: 2
 --- !u!212 &212080665695284858
 SpriteRenderer:

@@ -1,142 +1,4 @@
-﻿/*using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SceneManagement;
-
-public class Player : MovingObject {
-
-    public int wallDamage = 1; //Amount of damage character deals to walls
-    public int pointsPerFood = 10; //Amount of food points obtained from consuming a food item
-    public int pointsPerSoda = 20; //Amount of food points obtained from consuming a soda item
-    public float restartLevelDelay = 1f; //Time in seconds to delay restart of a level
-
-    private Animator animator; //Reference variable to store a reference to the character's animator component
-    private int food; //Total food points
-
-	// Use this for initialization
-	protected override void Start ()
-    {
-        //Get this object's animator component
-        animator = GetComponent<Animator>();
-
-        //GameManager has a static variable instance that is public and can
-        //be used to access the GameManager object's public members through
-        //This singleton
-        food = GameManager.instance.playerFoodPoints;
-
-        //base refers to the base or superclass but MovingObject does not
-        //specifically implement one. Presumably, the base class is MonoBehaviour
-        //or GameObject or another in the inheritance hierarchy that implements
-        //Start()
-        base.Start();
-	}
-
-    //Use this method to store the player's food points in the GameManager singleton
-    private void OnDisable()
-    {
-        GameManager.instance.playerFoodPoints = food;
-    }
-
-    void Update()
-    {
-        //Not the player's turn
-        if (!GameManager.instance.playersTurn) return;
-
-        int horizontal = 0;
-        int vertical = 0;
-
-        //Get input value for horizontal movement
-        horizontal = (int)(Input.GetAxisRaw("Horizontal"));
-        //Get input value for vertical movement
-        vertical = (int)(Input.GetAxisRaw("Vertical"));
-
-        //Move only along horizontal axis
-        if (horizontal != 0)
-            vertical = 0;
-
-        if (horizontal != 0 || vertical != 0)
-            AttemptMove<Wall>(horizontal, vertical);
-    }
-
-    protected override void OnCantMove<T>(T component)
-    {
-        //Cast the component as a Wall object
-        Wall hitWall = component as Wall;
-        //Call the Wall object's DamageWall method
-        hitWall.DamageWall(wallDamage);
-        //Set the character's animator trigger to play the Player_Chop animation
-        animator.SetTrigger("Player_Chop");
-    }
-
-    public void Restart()
-    {
-        //Loads the last scence loaded. Main because it is the only level
-        //and each is procedurally generated
-        SceneManager.LoadScene(0);
-    }
-
-    public void LoseFood(int loss)
-    {
-        //Set the trigger for the character object's animator so that
-        //the Player_Hit animation is initiated
-        animator.SetTrigger("Player_Hit");
-
-        food -= loss; //Amount of damage the character takes
-
-        //Determine whether the character's food points have depleted completely
-        CheckIfGameOver();
-    }
-
-    protected override void AttemptMove<T>(int xDir, int yDir)
-    {
-        food--; //Part of the game's mechanics to use a food point for every unit moved
-
-        //Attempt to move using the base class's implementation of it
-        base.AttemptMove<T>(xDir, yDir);
-
-        RaycastHit2D hit; //Used in the following call to move which takes a reference parameter
-
-        //Move(xDir, yDir, out hit);
-        
-        CheckIfGameOver(); //Because food points deplete with every movement, must check if game is over
-
-        //If the game is not over, the player's turn is over after a movement
-        GameManager.instance.playersTurn = false;
-    }
-
-    //Implements game mechanics for character
-    private void OnTriggerEnter2D(Collider2D otherObject)
-    {
-       if (otherObject.tag == "Exit")
-        {
-            //Call method that ends the level
-            Invoke("Restart", restartLevelDelay);
-            enabled = false; //Disable the character while the level restarts
-        }
-       else if (otherObject.tag == "Food")
-        {
-            food += pointsPerFood; //Increase character's food points
-            //Deactivate the food item on the game board
-            otherObject.gameObject.SetActive(false);
-        }
-       else if (otherObject.tag == "Soda")
-        {
-            food += pointsPerSoda; //Increase character's food points
-            //Deactivate the soda item on the game board
-            otherObject.gameObject.SetActive(false);
-        }
-    }
-    private void CheckIfGameOver()
-    {
-        //If food points have been depleted, the game is over and the
-        //GameManager singleton is used to invoke its GameOver function
-        //to disable the game
-        if (food <= 0)
-            GameManager.instance.GameOver();
-    }
-}*/
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;      //Allows us to use SceneManager
 
@@ -148,11 +10,14 @@ public class Player : MovingObject
     public int pointsPerSoda = 20;              //Number of points to add to player food points when picking up a soda object.
     public int wallDamage = 1;                  //How much damage a player does to a wall when chopping it.
     public float speed;
+    public int meleeDamage;
 
     private Animator animator;                  //Used to store a reference to the Player's animator component.
     private int food;                           //Used to store player food points total during level.
     private Vector2 moveVelocity;
     private Rigidbody2D rb;
+    private float radius = 1.0f;
+    
 
     //Start overrides the Start function of MovingObject
     protected override void Start()
@@ -217,8 +82,16 @@ public class Player : MovingObject
     {
         rb.MovePosition(rb.position + moveVelocity * Time.fixedDeltaTime);
         AttemptMove<Wall>((int)rb.position.x, (int)rb.position.y);
-        //if (Input.GetKey("a")) animator.SetTrigger("playerChop");
-
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            animator.SetTrigger("Player_Chop");
+            Collider2D[] hitObjs = Physics2D.OverlapCircleAll(transform.position, radius);
+            if (hitObjs.Length > 1)
+            {
+                hitObjs[1].SendMessage("TakeDamage", meleeDamage, SendMessageOptions.DontRequireReceiver);
+                Debug.Log("Hit " + hitObjs[1]);
+            }
+        }
     }
 
 
@@ -261,7 +134,7 @@ public class Player : MovingObject
         hitWall.DamageWall(wallDamage);
 
         //Set the attack trigger of the player's animation controller in order to play the player's attack animation.
-        animator.SetTrigger("playerChop");
+        animator.SetTrigger("Player_Chop");
     }
 
 
@@ -314,7 +187,7 @@ public class Player : MovingObject
     public void LoseFood(int loss)
     {
         //Set the trigger for the player animator to transition to the playerHit animation.
-        animator.SetTrigger("playerHit");
+        animator.SetTrigger("Player_Hit");
 
         //Subtract lost food points from the players total.
         food -= loss;
