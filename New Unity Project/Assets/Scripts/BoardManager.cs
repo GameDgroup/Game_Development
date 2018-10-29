@@ -75,7 +75,10 @@ public class BoardManager : MonoBehaviour
                     if (x == -1 || x == columns || y == -1 || y == rows)
                         toInstantiate = outerWallTiles[Random.Range(0, outerWallTiles.Length)];
 
-                    //Instantiate the GameObject instance using the prefab chosen for toInstantiate at the Vector3 corresponding to current grid position in loop, cast it to GameObject.
+                    //Instantiate the GameObject instance using the prefab chosen for toInstantiate at the Vector3 corresponding to current grid 
+                    //position in loop, cast it to GameObject. For instance, if within the outerwall indeces, a floortile prefab is instantiate
+                    //(chosen randomly from the floortile prefabs assigned in the unity UI) and that floor tile is positioned at (x, y) on the 
+                    //game board
                     GameObject instance =
                         Instantiate(toInstantiate, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
 
@@ -90,6 +93,7 @@ public class BoardManager : MonoBehaviour
         Vector3 RandomPosition()
         {
             //Declare an integer randomIndex, set it's value to a random number between 0 and the count of items in our List gridPositions.
+            //The index generated here by the Range function is exclusive of the gridPositions List data structure's amount of elements
             int randomIndex = Random.Range(0, gridPositions.Count);
 
             //Declare a variable of type Vector3 called randomPosition, set it's value to the entry at randomIndex from our List gridPositions.
