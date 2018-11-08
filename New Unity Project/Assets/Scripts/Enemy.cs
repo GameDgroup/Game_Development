@@ -7,10 +7,12 @@ public class Enemy : MovingObject {
     public int playerDamage;
     public int badGuyHealth;
     public float speed;
+    public int playerFood;
 
     private Animator animator;
     private Transform target;
     private bool skipMove;
+    private Player foodCheck;
 
 	// Use this for initialization
 	protected override void Start ()
@@ -18,18 +20,51 @@ public class Enemy : MovingObject {
         GameManager.instance.AddEnemyToList(this);
         animator = GetComponent<Animator>();
         target = GameObject.FindGameObjectWithTag("Player").transform;
+        foodCheck = new Player();
         base.Start();
 	}
 	
 	// Update is called once per frame
 	void Update ()
     {
-		if (Vector2.Distance(transform.position, target.position) > 1)
+        playerFood = foodCheck.getFoodPoints();
+
+        if (Vector2.Distance(transform.position, target.position) > 1 && Vector2.Distance(transform.position, target.position) < 4 &&
+            playerFood < 120)
         {
-            transform.position = Vector2.MoveTowards(transform.position, target.position,
-                                                     speed * Time.deltaTime);
+            seek();
         }
+        else if (Vector2.Distance(transform.position, target.position) < 1 && playerFood < 120)
+        {
+            attack();
+        }
+        else if (Vector2.Distance(transform.position, target.position) > 1 && Vector2.Distance(transform.position, target.position) < 4 &&
+                 playerFood >= 120)
+        {
+            flee();
+        }
+        
 	}
+
+    private void seek()
+    {
+        transform.position = Vector2.MoveTowards(transform.position, target.position,
+                                                     speed * Time.deltaTime);
+    }
+
+    private void attack()
+    {
+        Player hitPlayer = new Player();
+
+        animator.SetTrigger("EnemyAttack");
+
+        hitPlayer.LoseFood(playerDamage);
+    }
+
+    private void flee()
+    {
+        transform.position = Vector2.MoveTowards(transform.position, target.position, -1 * speed * Time.deltaTime);
+    }
 
     public void TakeDamage(int damage)
     {
@@ -39,7 +74,7 @@ public class Enemy : MovingObject {
             Destroy(gameObject);
     }
 
-    protected override void AttemptMove<T>(int xDir, int yDir)
+    /*protected override void AttemptMove<T>(int xDir, int yDir)
     {
         if (skipMove)
         {
@@ -50,7 +85,7 @@ public class Enemy : MovingObject {
         base.AttemptMove<T>(xDir, yDir);
 
         skipMove = true;
-    }
+    }*/
 
     public void MoveEnemy()
     {
@@ -62,7 +97,7 @@ public class Enemy : MovingObject {
         else
             xDir = target.position.x > transform.position.x ? 1 : -1;
 
-        AttemptMove<Player>(xDir, yDir);
+        //AttemptMove<Player>(xDir, yDir);
     }
 
     protected override void OnCantMove<T>(T component)

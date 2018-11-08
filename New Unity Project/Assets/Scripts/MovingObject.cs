@@ -23,7 +23,7 @@ public abstract class MovingObject : MonoBehaviour {
 	protected virtual void Start ()
     {
         boxCollider = GetComponent<BoxCollider2D>(); //Get MovingObject's BoxCollider2D component
-        //rb2D = GetComponent<Rigidbody2D>(); //Get MovingObject's RigidBody2D component
+        rb2D = GetComponent<Rigidbody2D>(); //Get MovingObject's RigidBody2D component
         //inverseMoveTime = 1f / moveTime;
 	}
 
@@ -50,8 +50,9 @@ public abstract class MovingObject : MonoBehaviour {
         if(hit.transform == null) //Did not register a position it hit
         {
             //Given collision did not occur, begin movement of MovingObject
-            StartCoroutine(SmoothMovement(end));
+            //StartCoroutine(SmoothMovement(end));
             //Successfully moved object to target position, end
+            rb2D.MovePosition(rb2D.position + end * Time.fixedDeltaTime);
             return true;
         }
 

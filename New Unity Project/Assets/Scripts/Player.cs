@@ -13,11 +13,15 @@ public class Player : MovingObject
     public int meleeDamage;
 
     private Animator animator;                  //Used to store a reference to the Player's animator component.
-    private int food;                           //Used to store player food points total during level.
+    public int food;                           //Used to store player food points total during level.
     private Vector2 moveVelocity;
     private Rigidbody2D rb;
     private float radius = 1.0f;
     
+    public int getFoodPoints()
+    {
+        return food;
+    }
 
     //Start overrides the Start function of MovingObject
     protected override void Start()
@@ -74,27 +78,32 @@ public class Player : MovingObject
 
         Vector2 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         moveVelocity = moveInput.normalized * speed;
+        //AttemptMove<Wall>((int)moveVelocity.x, (int)moveVelocity.y);
     }
 
 
 
     public void FixedUpdate()
     {
+        //AttemptMove<Wall>((int)rb.position.x, (int)rb.position.y);
         rb.MovePosition(rb.position + moveVelocity * Time.fixedDeltaTime);
-        AttemptMove<Wall>((int)rb.position.x, (int)rb.position.y);
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             animator.SetTrigger("Player_Chop");
             Collider2D[] hitObjs = Physics2D.OverlapCircleAll(transform.position, radius);
             if (hitObjs.Length > 1)
             {
-                hitObjs[1].SendMessage("TakeDamage", meleeDamage, SendMessageOptions.DontRequireReceiver);
-                Debug.Log("Hit " + hitObjs[1]);
+                for (int i = 1; i < hitObjs.Length; i++)
+                {
+                    hitObjs[i].SendMessage("TakeDamage", meleeDamage, SendMessageOptions.DontRequireReceiver);
+                    Debug.Log("Hit " + hitObjs[i]);
+                }
             }
         }
     }
 
-
+    
 
     //AttemptMove overrides the AttemptMove function in the base class MovingObject
     //AttemptMove takes a generic parameter T which for Player will be of the type Wall, it also takes integers for x and y direction to move in.
@@ -137,6 +146,10 @@ public class Player : MovingObject
         animator.SetTrigger("Player_Chop");
     }
 
+    /*private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if ()
+    }*/
 
     //OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).
     private void OnTriggerEnter2D(Collider2D other)
@@ -150,7 +163,12 @@ public class Player : MovingObject
             //Disable the player object since level is over.
             enabled = false;
         }
-
+        else if (other.tag == "Outer_Wall")
+        {
+            //rb.MovePosition(rb.position + -1 * moveVelocity * Time.fixedDeltaTime);
+            //Invoke("Restart", restartLevelDelay);
+            rb.velocity = Vector2.zero;
+        }
         //Check if the tag of the trigger collided with is Food.
         else if (other.tag == "Food")
         {
