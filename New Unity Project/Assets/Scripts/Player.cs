@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.SceneManagement;      //Allows us to use SceneManager
+using UnityEngine.UI;
 
 //Player inherits from MovingObject, our base class for objects that can move, Enemy also inherits from this.
 public class Player : MovingObject
@@ -11,6 +12,7 @@ public class Player : MovingObject
     public int wallDamage = 1;                  //How much damage a player does to a wall when chopping it.
     public float speed;
     public int meleeDamage;
+    public Text foodText;
 
     private Animator animator;                  //Used to store a reference to the Player's animator component.
     public int food;                           //Used to store player food points total during level.
@@ -18,10 +20,7 @@ public class Player : MovingObject
     private Rigidbody2D rb;
     private float radius = 1.0f;
     
-    public int getFoodPoints()
-    {
-        return food;
-    }
+    
 
     //Start overrides the Start function of MovingObject
     protected override void Start()
@@ -32,11 +31,17 @@ public class Player : MovingObject
         //Get the current food point total stored in GameManager.instance between levels.
         food = GameManager.instance.playerFoodPoints;
 
+        foodText.text = "Food: " + food;
+
         rb = GetComponent<Rigidbody2D>();
         //Call the Start function of the MovingObject base class.
         base.Start();
     }
 
+    public int getFoodPoints()
+    {
+        return food;
+    }
 
     //This function is called when the behaviour becomes disabled or inactive.
     private void OnDisable()
@@ -77,7 +82,7 @@ public class Player : MovingObject
         }*/
 
         Vector2 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        moveVelocity = moveInput.normalized * speed;
+        moveVelocity = moveInput * speed;
         //AttemptMove<Wall>((int)moveVelocity.x, (int)moveVelocity.y);
     }
 
@@ -85,8 +90,8 @@ public class Player : MovingObject
 
     public void FixedUpdate()
     {
-        //AttemptMove<Wall>((int)rb.position.x, (int)rb.position.y);
         rb.MovePosition(rb.position + moveVelocity * Time.fixedDeltaTime);
+        //rb.AddForce(moveVelocity);
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -167,7 +172,7 @@ public class Player : MovingObject
         {
             //rb.MovePosition(rb.position + -1 * moveVelocity * Time.fixedDeltaTime);
             //Invoke("Restart", restartLevelDelay);
-            rb.velocity = Vector2.zero;
+            Debug.Log("Hit outer wall");
         }
         //Check if the tag of the trigger collided with is Food.
         else if (other.tag == "Food")
@@ -175,6 +180,7 @@ public class Player : MovingObject
             //Add pointsPerFood to the players current food total.
             food += pointsPerFood;
 
+            foodText.text = "+" + pointsPerFood + " Food: " + food;
             //Disable the food object the player collided with.
             other.gameObject.SetActive(false);
         }
@@ -185,6 +191,7 @@ public class Player : MovingObject
             //Add pointsPerSoda to players food points total
             food += pointsPerSoda;
 
+            foodText.text = "+" + pointsPerSoda + " Food: " + food;
 
             //Disable the soda object the player collided with.
             other.gameObject.SetActive(false);
@@ -210,6 +217,7 @@ public class Player : MovingObject
         //Subtract lost food points from the players total.
         food -= loss;
 
+        foodText.text = "-" + loss + " Food: " + food;
         //Check to see if game has ended.
         CheckIfGameOver();
     }

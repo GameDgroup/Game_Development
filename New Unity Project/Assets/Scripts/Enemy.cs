@@ -8,11 +8,12 @@ public class Enemy : MovingObject {
     public int badGuyHealth;
     public float speed;
     public int playerFood;
+    public Player player;
 
     private Animator animator;
     private Transform target;
     private bool skipMove;
-    private Player foodCheck;
+    
 
 	// Use this for initialization
 	protected override void Start ()
@@ -20,31 +21,33 @@ public class Enemy : MovingObject {
         GameManager.instance.AddEnemyToList(this);
         animator = GetComponent<Animator>();
         target = GameObject.FindGameObjectWithTag("Player").transform;
-        foodCheck = new Player();
+        //player = GetComponent<Player>();
         base.Start();
 	}
 	
 	// Update is called once per frame
 	void Update ()
     {
-        playerFood = foodCheck.getFoodPoints();
+        playerFood = player.getFoodPoints();
+	}
 
+    private void FixedUpdate()
+    {
         if (Vector2.Distance(transform.position, target.position) > 1 && Vector2.Distance(transform.position, target.position) < 4 &&
-            playerFood < 120)
+            playerFood < 120 && badGuyHealth > 20)
         {
             seek();
         }
-        else if (Vector2.Distance(transform.position, target.position) < 1 && playerFood < 120)
+        else if (Vector2.Distance(transform.position, target.position) < 1 && playerFood < 120 && badGuyHealth > 20)
         {
             attack();
+            //player.SendMessage("LoseFood", playerDamage, SendMessageOptions.DontRequireReceiver);
         }
-        else if (Vector2.Distance(transform.position, target.position) > 1 && Vector2.Distance(transform.position, target.position) < 4 &&
-                 playerFood >= 120)
+        else if (badGuyHealth <= 20)
         {
             flee();
         }
-        
-	}
+    }
 
     private void seek()
     {
@@ -54,11 +57,9 @@ public class Enemy : MovingObject {
 
     private void attack()
     {
-        Player hitPlayer = new Player();
-
         animator.SetTrigger("EnemyAttack");
 
-        hitPlayer.LoseFood(playerDamage);
+        player.LoseFood(playerDamage);
     }
 
     private void flee()
