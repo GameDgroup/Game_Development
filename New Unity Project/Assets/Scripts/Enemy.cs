@@ -64,7 +64,7 @@ public class Enemy : MovingObject {
 
     private void flee()
     {
-        transform.position = Vector2.MoveTowards(transform.position, target.position, -1 * speed * Time.deltaTime);
+        transform.position = Vector2.MoveTowards(transform.position, target.position, -1.25f * speed * Time.deltaTime);
     }
 
     public void TakeDamage(int damage)
